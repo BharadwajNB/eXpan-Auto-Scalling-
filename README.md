@@ -1,6 +1,10 @@
 <div align="center">
 
-# ⚡ eXpan
+<a href="#-system-architecture">
+  <img src="public/logo.svg" alt="eXpan Cloud Infrastructure & Auto-Scaling Platform" width="130" height="130" />
+</a>
+
+# eXpan
 ### Production-Grade Cloud Infrastructure, Application Load Balancing & Auto-Scaling Platform
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)

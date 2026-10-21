@@ -86,8 +86,8 @@ export const Header: React.FC<HeaderProps> = ({ onMobileMenuToggle }) => {
           </button>
 
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-neutral-900 border border-neutral-700 flex items-center justify-center text-white">
-              <Cloud className="w-3.5 h-3.5" />
+            <div className="w-6 h-6 rounded bg-neutral-900 border border-neutral-700 flex items-center justify-center p-0.5">
+              <img src="/favicon.svg" alt="eXpan" className="w-4 h-4" />
             </div>
             <div className="flex items-baseline gap-1.5 font-mono">
               <span className="text-xs font-bold tracking-wider text-white">eXpan</span>
