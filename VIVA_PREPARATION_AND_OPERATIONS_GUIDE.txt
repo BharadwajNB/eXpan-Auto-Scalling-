@@ -1,0 +1,208 @@
+================================================================================
+          eXpan — CLOUD INFRASTRUCTURE & AUTO-SCALING PLATFORM
+              VIVA PREPARATION NOTES & OPERATIONS GUIDE
+================================================================================
+
+PROJECT NAME: eXpan — Auto-Scaling Web Application
+DOMAIN: Cloud Computing, Elastic Infrastructure, Load Balancing, Observability
+TECH STACK: Node.js (v24), Express, React 19, TypeScript, Vite, Tailwind CSS, Recharts
+STATUS: Fully functional real-world distributed system running on local ports.
+
+--------------------------------------------------------------------------------
+1. ARCHITECTURAL OVERVIEW (WHAT TO EXPLAIN TO EXAMINERS)
+--------------------------------------------------------------------------------
+eXpan is a full-stack, distributed Cloud Computing platform modeling AWS
+infrastructure elasticity:
+
+[ Public Clients / Traffic Generator ]
+                 │
+                 ▼ (HTTP Port 5000)
+    [ Application Load Balancer (ALB) Gateway ]
+       (Reverse Proxy: Least Connections / Round Robin)
+                 │
+     ┌───────────┴───────────┬───────────────────────┐
+     ▼ (Port 4001)           ▼ (Port 4002)           ▼ (Port 4003+)
+[ Worker Node #1 ]      [ Worker Node #2 ]      [ Worker Node #3 ]
+ PID: Real OS Process    PID: Real OS Process    (Dynamically Forked)
+ IP: 10.0.1.45           IP: 10.0.2.50           IP: 10.0.1.55
+     │                       │                       │
+     └───────────┬───────────┴───────────────────────┘
+                 │ (Periodic Health Probes & Real Telemetry)
+                 ▼
+     [ CloudWatch Metric Collector & Alarm Evaluator ]
+                 │
+                 ▼
+     [ Auto Scaling Group (ASG) Controller ]
+      (Target Tracking Policy: CPU > 70% Scale-Out, CPU < 30% Scale-In)
+                 │
+     ┌───────────┴───────────┐
+     ▼                       ▼
+[ Auto Scale-Out (+1) ]  [ Auto Scale-In (-1) ]
+ Spawns Child Process     Drains & Kills Process
+
+
+--------------------------------------------------------------------------------
+2. EXACTLY WHAT WAS MODIFIED & BUILT (POINT-WISE VIVA SUMMARY)
+--------------------------------------------------------------------------------
+
+A. ARCHITECTURAL TRANSFORMATION (NO MORE MOCK DATA)
+  • Previously: Purely a frontend UI demo running on Math.random() and static
+    mock files (mockMetrics.ts).
+  • Modified: Converted into an active, multi-process distributed backend system
+    running real child processes, a live reverse proxy, real HTTP load injection,
+    and persistent audit logging.
+  • Permanently deleted the mock data file: src/services/mockMetrics.ts.
+
+B. BACKEND ENGINE CREATED FROM SCRATCH (server/):
+  1. Microservice Worker Fleet (server/worker.js):
+     - Real, independent Node.js HTTP servers spawned via child_process.fork().
+     - Listens on dedicated dynamic ports (4001, 4002, 4003, ...).
+     - Reports real OS PID, memory allocation (process.memoryUsage()), uptime,
+       and answers /health and /api/work endpoints.
+     - Emits live stdout/stderr streams captured into rotating log buffers.
+
+  2. Cloud Master Controller & REST API (server/index.ts - 900+ lines):
+     - Cluster Fleet Manager: Handles dynamic port allocation (getAvailablePort),
+       forks child processes, and coordinates graceful connection draining.
+     - Application Load Balancer (ALB): Reverse proxy mounted at
+       /api/gateway/work that balances traffic using Least Outstanding
+       Requests or Round Robin algorithms.
+     - Active Health Check Engine: Probes /health on all registered targets
+       every 5 seconds. If a process dies, it marks the target UNHEALTHY.
+     - HTTP Load Testing Engine: Dispatches real concurrent HTTP requests
+       to benchmark elasticity, recording actual round-trip latency (ms),
+       throughput (req/s), and HTTP error status codes.
+     - Auto-Scaling Group (ASG) Supervisor Loop: Runs every 2 seconds,
+       computes real average CPU/RPS, triggers Scale-Out when CPU > 70%,
+       executes connection draining and Scale-In when CPU < 30%, and performs
+       Self-Healing if any process fails.
+     - Persistent Event Logging: Writes scaling decisions and CloudWatch
+       alarms to disk in server/data/events.json.
+
+C. FRONTEND & STATE MANAGEMENT RE-ARCHITECTURE:
+  1. Real REST Client (src/services/apiMetricsService.ts):
+     - Implemented 15+ real API methods calling the backend server.
+  2. Store Re-Architecture (src/store/useSystemStore.ts):
+     - Replaced fake simulation timers with a live telemetry poller.
+     - All user actions (Provision Node, Terminate, Reboot, Crash, Start Load
+       Test, Send Probe, Save Settings) call real backend endpoints.
+  3. Live Process Log Streaming (src/components/instances/InstanceDrawer.tsx):
+     - Connected the drawer to stream real stdout/stderr lines from the active
+       worker process (equivalent to tail -f /var/log/nginx/access.log).
+  4. Proxy & Concurrency Configuration:
+     - Configured Vite proxy in vite.config.ts (/api -> http://localhost:5000).
+     - Added npm run server and concurrent npm run dev scripts in package.json.
+
+D. UI/UX CLEANUP:
+  • Removed all "Demo", "Fake", and "FD" placeholder text.
+  • Added a real-time "ENGINE: ONLINE" status pill.
+  • Replaced simulated buttons with real "Start HTTP Load Test", "Crash Node via
+    SIGKILL", and "Inject CPU Stress" controls.
+
+
+--------------------------------------------------------------------------------
+3. STEP-BY-STEP SMOOTH DEMONSTRATION SCRIPT (HOW TO OPERATE)
+--------------------------------------------------------------------------------
+
+STEP 1: SHOW BASELINE FLEET & TOPOLOGY (/dashboard)
+  • Open http://localhost:5173/dashboard in your browser.
+  • Say: "Here is our central dashboard showing the live architecture topology:
+    incoming client traffic routes through our Application Load Balancer, which
+    distributes requests across healthy EC2 worker nodes."
+  • Click on the first server blade (web-prod-app-01).
+  • Show the examiner: Real OS PID, private IP (10.0.1.45), port (4001), and
+    memory allocation.
+  • Click the "Live Process Logs" tab: Point out that these are real live stdout
+    logs streamed directly from that Node.js worker process.
+
+STEP 2: TRIGGER REAL HORIZONTAL SCALE-OUT (/load-testing)
+  • Navigate to Load Testing (/load-testing).
+  • Say: "We will now benchmark our target tracking policy. Currently, the fleet
+    has 1 instance under baseline load. We will inject a 'High Surge' workload of
+    165 req/s."
+  • Select the "High Surge" card (165 req/s) and click "Start HTTP Load Test".
+  • Point out:
+    1. Real HTTP requests are being fired against http://localhost:5000/api/gateway/work.
+    2. The Fleet CPU line breaches the dashed 70% Scale-Out threshold line.
+    3. The top header updates to "SCALING UP (+1 INSTANCE)".
+    4. The ASG forks web-prod-app-02 on port 4002.
+    5. As soon as the new instance passes health checks, traffic is divided
+       50% / 50%, and fleet CPU drops back to safe levels (~42%).
+
+STEP 3: DEMONSTRATE DISASTER RECOVERY & SELF-HEALING (THE "WOW" FACTOR)
+  • Open the side drawer on any running node.
+  • Say: "In production cloud environments, processes can crash or experience
+    hardware failure. eXpan has built-in automated self-healing. I will now
+    simulate node failure by sending a SIGKILL signal."
+  • Click "Crash Node via SIGKILL (Test Self-Healing)".
+  • Show the examiner:
+    1. The node turns UNHEALTHY as ALB health checks fail.
+    2. Within 2 seconds, the ASG supervisor detects the dead process, purges it,
+       automatically launches a replacement worker, and attaches it to the ALB.
+    3. Point to the green notification: "ASG Self-Healing Activated".
+
+STEP 4: DEMONSTRATE AUTOMATED SCALE-IN (COST OPTIMIZATION)
+  • Go back to /load-testing and click "Stop Load Test".
+  • Say: "Once traffic normalizes, keeping surplus instances running wastes cloud
+    budget. As CPU drops below 30%, our policy initiates connection draining,
+    waits for in-flight requests to complete, terminates surplus nodes, and
+    returns the fleet to our baseline floor of 1 instance."
+
+STEP 5: SHOW OBSERVABILITY & AUDIT TRAIL (/monitoring & /events)
+  • Navigate to Monitoring (/monitoring): Show real-time CloudWatch charts
+    (CPU %, Ingress RPS, Latency, and Error Rate). Click "Export CSV".
+  • Navigate to Events Log (/events): Show the audit trail of all automated
+    scaling decisions, health checks, and self-healing actions. Click "Export JSON".
+
+
+--------------------------------------------------------------------------------
+4. FREQUENTLY ASKED VIVA QUESTIONS & WINNING ANSWERS
+--------------------------------------------------------------------------------
+
+Q1: "Is this simulation or are real servers running?"
+A1: "Real servers are running. The backend master on port 5000 spawns independent
+     Node.js child processes for each worker node on dynamic ports (4001, 4002...).
+     Each worker has its own OS PID, memory footprint, handles HTTP requests,
+     and streams stdout logs."
+
+Q2: "What load balancing algorithms are implemented?"
+A2: "The Application Load Balancer supports both 'Least Outstanding Requests'
+     (which dynamically routes incoming HTTP requests to whichever worker node
+     currently has the fewest active in-flight requests) and 'Round Robin'."
+
+Q3: "How does the Auto Scaling policy avoid flapping (rapid scaling up/down)?"
+A3: "It uses an asymmetry in thresholds (Scale-Out at >70% CPU, Scale-In at <30%
+     CPU) combined with an active cooldown timer (default: 45s) and connection
+     draining delays. Scale-in is also suppressed while a load test is active."
+
+Q4: "How does Self-Healing work?"
+A4: "The load balancer probes each worker's /health endpoint every 5 seconds. If a
+     node crashes or fails consecutive probes, the target is marked UNHEALTHY.
+     The ASG supervisor detects this, initiates clean disposal of the dead node,
+     and immediately provisions a new replacement node."
+
+Q5: "How does the frontend communicate with the backend?"
+A5: "The React 19 SPA communicates via REST API endpoints through a Vite reverse
+     proxy (/api -> http://localhost:5000), decoupling frontend presentation
+     from backend cluster orchestration."
+
+
+--------------------------------------------------------------------------------
+5. QUICK COMMANDS CHEAT SHEET
+--------------------------------------------------------------------------------
+• Start Application (Both Server & Client):
+  npm run dev
+
+• Web App URL:
+  http://localhost:5173/
+
+• Backend API:
+  http://localhost:5000/api/metrics/system
+
+• ALB Gateway Ingress:
+  http://localhost:5000/api/gateway/work
+
+• Individual Worker Health Endpoints:
+  http://localhost:4001/health
+  http://localhost:4002/health
+================================================================================

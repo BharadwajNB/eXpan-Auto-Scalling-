@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-main: #000000;
+    --card-surface: #0a0a0a;
+    --border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  body {
+    background-color: #000000;
+    color: #ffffff;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Minimal Monochrome Scrollbar */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.35);
+  }
+}
+
+@layer components {
+  /* Minimal Black & White Surface Panels */
+  .panel-surface {
+    background: #0d0d0d;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .card-surface {
+    background: #111111;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .subtle-hover {
+    transition: all 0.15s ease-out;
+  }
+  .subtle-hover:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+    background: #171717;
+  }
+
+  @keyframes flow-dash {
+    to {
+      stroke-dashoffset: -16;
+    }
+  }
+
+  .animate-flow-dash {
+    animation: flow-dash 0.8s linear infinite;
+  }
+}
+
+/* Black & White Recharts Tooltip */
+.recharts-default-tooltip {
+  background-color: #000000 !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.9) !important;
+  color: #ffffff !important;
+  padding: 6px 10px !important;
+  font-size: 11px !important;
+  font-family: inherit !important;
+}
+
+.recharts-tooltip-item {
+  color: #e5e5e5 !important;
+  font-size: 11px !important;
+  padding: 1px 0 !important;
+}
+
+.recharts-tooltip-label {
+  color: #888888 !important;
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
