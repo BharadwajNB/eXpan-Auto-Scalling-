@@ -1,6 +1,7 @@
 import { Instance, ScalingEvent, SystemMetrics, MetricDataPoint, AutoScalingConfig, LoadBalancerInfo, LoadTestConfig } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+const rawEnvUrl = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = (!rawEnvUrl || rawEnvUrl.includes('example.com')) ? '/api' : rawEnvUrl;
 
 export class ApiMetricsService {
   private baseUrl: string;
