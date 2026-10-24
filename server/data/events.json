@@ -1,5 +1,364 @@
 [
   {
+    "id": "evt-1792834171549-27ab",
+    "timestamp": "02:59:31 pm",
+    "type": "instance-started",
+    "instanceId": "i-00f126cc9",
+    "reason": "Node web-prod-app-04 (i-00f126cc9) initialized and passed ALB target checks.",
+    "status": "completed",
+    "details": "Listening on port 4004 in ap-south-1b"
+  },
+  {
+    "id": "evt-1792834171140-e6ad",
+    "timestamp": "02:59:31 pm",
+    "type": "scale-out",
+    "instanceId": "i-00f126cc9",
+    "reason": "Auto Scaling Group launched instance web-prod-app-04 (i-00f126cc9) to meet desired capacity 4",
+    "status": "completed",
+    "details": "Capacity scaled from 3 to 4"
+  },
+  {
+    "id": "evt-1792834171140-0243",
+    "timestamp": "02:59:31 pm",
+    "type": "alert",
+    "reason": "High CPU Alarm: reached 77.5 (Threshold: > 70)",
+    "status": "completed",
+    "details": "CloudWatch alarm in ALARM state."
+  },
+  {
+    "id": "evt-1792834155477-e863",
+    "timestamp": "02:59:15 pm",
+    "type": "instance-started",
+    "instanceId": "i-07c3ffde9",
+    "reason": "Node web-prod-app-03 (i-07c3ffde9) initialized and passed ALB target checks.",
+    "status": "completed",
+    "details": "Listening on port 4003 in ap-south-1a"
+  },
+  {
+    "id": "evt-1792834155071-83d4",
+    "timestamp": "02:59:15 pm",
+    "type": "scale-out",
+    "instanceId": "i-07c3ffde9",
+    "reason": "Auto Scaling Group launched instance web-prod-app-03 (i-07c3ffde9) to meet desired capacity 3",
+    "status": "completed",
+    "details": "Capacity scaled from 2 to 3"
+  },
+  {
+    "id": "evt-1792834155070-1f74",
+    "timestamp": "02:59:15 pm",
+    "type": "alert",
+    "reason": "High CPU Alarm: reached 87.1 (Threshold: > 70)",
+    "status": "completed",
+    "details": "CloudWatch alarm in ALARM state."
+  },
+  {
+    "id": "evt-1792834139443-5b8c",
+    "timestamp": "02:58:59 pm",
+    "type": "instance-started",
+    "instanceId": "i-0de16bc66",
+    "reason": "Node web-prod-app-02 (i-0de16bc66) initialized and passed ALB target checks.",
+    "status": "completed",
+    "details": "Listening on port 4002 in ap-south-1b"
+  },
+  {
+    "id": "evt-1792834139030-d310",
+    "timestamp": "02:58:59 pm",
+    "type": "scale-out",
+    "instanceId": "i-0de16bc66",
+    "reason": "Auto Scaling Group launched instance web-prod-app-02 (i-0de16bc66) to meet desired capacity 2",
+    "status": "completed",
+    "details": "Capacity scaled from 1 to 2"
+  },
+  {
+    "id": "evt-1792834139030-5b57",
+    "timestamp": "02:58:59 pm",
+    "type": "alert",
+    "reason": "High CPU Alarm: reached 99 (Threshold: > 70)",
+    "status": "completed",
+    "details": "CloudWatch alarm in ALARM state."
+  },
+  {
+    "id": "evt-1792834130990-71ce",
+    "timestamp": "02:58:50 pm",
+    "type": "scale-in",
+    "instanceId": "i-045c60aa7",
+    "reason": "Instance web-prod-app-02 (i-045c60aa7) drained and terminated",
+    "status": "completed",
+    "details": "Manual administrative termination"
+  },
+  {
+    "id": "evt-1792834126592-9cee",
+    "timestamp": "02:58:46 pm",
+    "type": "scale-in",
+    "instanceId": "i-07670341e",
+    "reason": "Instance web-prod-app-04 (i-07670341e) drained and terminated",
+    "status": "completed",
+    "details": "Manual administrative termination"
+  },
+  {
+    "id": "evt-1792834126406-46a4",
+    "timestamp": "02:58:46 pm",
+    "type": "scale-in",
+    "instanceId": "i-07670341e",
+    "reason": "Instance web-prod-app-04 (i-07670341e) drained and terminated",
+    "status": "completed",
+    "details": "Manual administrative termination"
+  },
+  {
+    "id": "evt-1792834126187-1312",
+    "timestamp": "02:58:46 pm",
+    "type": "scale-in",
+    "instanceId": "i-07670341e",
+    "reason": "Instance web-prod-app-04 (i-07670341e) drained and terminated",
+    "status": "completed",
+    "details": "Manual administrative termination"
+  },
+  {
+    "id": "evt-1792834125951-b433",
+    "timestamp": "02:58:45 pm",
+    "type": "scale-in",
+    "instanceId": "i-07670341e",
+    "reason": "Instance web-prod-app-04 (i-07670341e) drained and terminated",
+    "status": "completed",
+    "details": "Manual administrative termination"
+  },
+  {
+    "id": "evt-1792834125482-5386",
+    "timestamp": "02:58:45 pm",
+    "type": "scale-in",
+    "instanceId": "i-07670341e",
+    "reason": "Instance web-prod-app-04 (i-07670341e) drained and terminated",
+    "status": "completed",
+    "details": "Manual administrative termination"
+  },
+  {
+    "id": "evt-1792834124691-a0a9",
+    "timestamp": "02:58:44 pm",
+    "type": "scale-in",
+    "instanceId": "i-0aa23dc85",
+    "reason": "Instance web-prod-app-03 (i-0aa23dc85) drained and terminated",
+    "status": "completed",
+    "details": "Manual administrative termination"
+  },
+  {
+    "id": "evt-1792834123369-7011",
+    "timestamp": "02:58:43 pm",
+    "type": "instance-started",
+    "instanceId": "i-07670341e",
+    "reason": "Node web-prod-app-04 (i-07670341e) initialized and passed ALB target checks.",
+    "status": "completed",
+    "details": "Listening on port 4004 in ap-south-1b"
+  },
+  {
+    "id": "evt-1792834122968-52ab",
+    "timestamp": "02:58:42 pm",
+    "type": "scale-out",
+    "instanceId": "i-07670341e",
+    "reason": "Auto Scaling Group launched instance web-prod-app-04 (i-07670341e) to meet desired capacity 4",
+    "status": "completed",
+    "details": "Capacity scaled from 3 to 4"
+  },
+  {
+    "id": "evt-1792834122967-27a5",
+    "timestamp": "02:58:42 pm",
+    "type": "alert",
+    "reason": "High CPU Alarm: reached 77.5 (Threshold: > 70)",
+    "status": "completed",
+    "details": "CloudWatch alarm in ALARM state."
+  },
+  {
+    "id": "evt-1792834122850-37f0",
+    "timestamp": "02:58:42 pm",
+    "type": "scale-in",
+    "instanceId": "i-0afeff92e",
+    "reason": "Instance web-prod-app-04 (i-0afeff92e) drained and terminated",
+    "status": "completed",
+    "details": "Manual administrative termination"
+  },
+  {
+    "id": "evt-1792834121775-4ed5",
+    "timestamp": "02:58:41 pm",
+    "type": "scale-in",
+    "instanceId": "i-0afeff92e",
+    "reason": "Instance web-prod-app-04 (i-0afeff92e) drained and terminated",
+    "status": "completed",
+    "details": "Manual administrative termination"
+  },
+  {
+    "id": "evt-1792833366455-7224",
+    "timestamp": "02:46:06 pm",
+    "type": "instance-started",
+    "instanceId": "i-0afeff92e",
+    "reason": "Node web-prod-app-04 (i-0afeff92e) initialized and passed ALB target checks.",
+    "status": "completed",
+    "details": "Listening on port 4004 in ap-south-1b"
+  },
+  {
+    "id": "evt-1792833366048-42b1",
+    "timestamp": "02:46:06 pm",
+    "type": "scale-out",
+    "instanceId": "i-0afeff92e",
+    "reason": "Auto Scaling Group launched instance web-prod-app-04 (i-0afeff92e) to meet desired capacity 4",
+    "status": "completed",
+    "details": "Capacity scaled from 3 to 4"
+  },
+  {
+    "id": "evt-1792833366048-1984",
+    "timestamp": "02:46:06 pm",
+    "type": "alert",
+    "reason": "High CPU Alarm: reached 77.5 (Threshold: > 70)",
+    "status": "completed",
+    "details": "CloudWatch alarm in ALARM state."
+  },
+  {
+    "id": "evt-1792833350446-2503",
+    "timestamp": "02:45:50 pm",
+    "type": "instance-started",
+    "instanceId": "i-0aa23dc85",
+    "reason": "Node web-prod-app-03 (i-0aa23dc85) initialized and passed ALB target checks.",
+    "status": "completed",
+    "details": "Listening on port 4003 in ap-south-1a"
+  },
+  {
+    "id": "evt-1792833350027-1dfb",
+    "timestamp": "02:45:50 pm",
+    "type": "scale-out",
+    "instanceId": "i-0aa23dc85",
+    "reason": "Auto Scaling Group launched instance web-prod-app-03 (i-0aa23dc85) to meet desired capacity 3",
+    "status": "completed",
+    "details": "Capacity scaled from 2 to 3"
+  },
+  {
+    "id": "evt-1792833350027-09b5",
+    "timestamp": "02:45:50 pm",
+    "type": "alert",
+    "reason": "High CPU Alarm: reached 87.1 (Threshold: > 70)",
+    "status": "completed",
+    "details": "CloudWatch alarm in ALARM state."
+  },
+  {
+    "id": "evt-1792833334390-36dc",
+    "timestamp": "02:45:34 pm",
+    "type": "instance-started",
+    "instanceId": "i-045c60aa7",
+    "reason": "Node web-prod-app-02 (i-045c60aa7) initialized and passed ALB target checks.",
+    "status": "completed",
+    "details": "Listening on port 4002 in ap-south-1b"
+  },
+  {
+    "id": "evt-1792833333971-de6d",
+    "timestamp": "02:45:33 pm",
+    "type": "scale-out",
+    "instanceId": "i-045c60aa7",
+    "reason": "Auto Scaling Group launched instance web-prod-app-02 (i-045c60aa7) to meet desired capacity 2",
+    "status": "completed",
+    "details": "Capacity scaled from 1 to 2"
+  },
+  {
+    "id": "evt-1792833333971-a8cb",
+    "timestamp": "02:45:33 pm",
+    "type": "alert",
+    "reason": "High CPU Alarm: reached 99 (Threshold: > 70)",
+    "status": "completed",
+    "details": "CloudWatch alarm in ALARM state."
+  },
+  {
+    "id": "evt-1792833332418-5395",
+    "timestamp": "02:45:32 pm",
+    "type": "instance-started",
+    "instanceId": "i-045d6d2f5",
+    "reason": "Node web-prod-app-01 (i-045d6d2f5) initialized and passed ALB target checks.",
+    "status": "completed",
+    "details": "Listening on port 4001 in ap-south-1a"
+  },
+  {
+    "id": "evt-1792831048810-c507",
+    "timestamp": "02:07:28 pm",
+    "type": "instance-started",
+    "instanceId": "i-0c88f6b51",
+    "reason": "Node web-prod-app-04 (i-0c88f6b51) initialized and passed ALB target checks.",
+    "status": "completed",
+    "details": "Listening on port 4004 in ap-south-1b"
+  },
+  {
+    "id": "evt-1792831048405-33cb",
+    "timestamp": "02:07:28 pm",
+    "type": "scale-out",
+    "instanceId": "i-0c88f6b51",
+    "reason": "Auto Scaling Group launched instance web-prod-app-04 (i-0c88f6b51) to meet desired capacity 4",
+    "status": "completed",
+    "details": "Capacity scaled from 3 to 4"
+  },
+  {
+    "id": "evt-1792831048405-4dc5",
+    "timestamp": "02:07:28 pm",
+    "type": "alert",
+    "reason": "High CPU Alarm: reached 77.5 (Threshold: > 70)",
+    "status": "completed",
+    "details": "CloudWatch alarm in ALARM state."
+  },
+  {
+    "id": "evt-1792831032747-6467",
+    "timestamp": "02:07:12 pm",
+    "type": "instance-started",
+    "instanceId": "i-0198ca0fe",
+    "reason": "Node web-prod-app-03 (i-0198ca0fe) initialized and passed ALB target checks.",
+    "status": "completed",
+    "details": "Listening on port 4003 in ap-south-1a"
+  },
+  {
+    "id": "evt-1792831032338-0417",
+    "timestamp": "02:07:12 pm",
+    "type": "scale-out",
+    "instanceId": "i-0198ca0fe",
+    "reason": "Auto Scaling Group launched instance web-prod-app-03 (i-0198ca0fe) to meet desired capacity 3",
+    "status": "completed",
+    "details": "Capacity scaled from 2 to 3"
+  },
+  {
+    "id": "evt-1792831032336-eb7d",
+    "timestamp": "02:07:12 pm",
+    "type": "alert",
+    "reason": "High CPU Alarm: reached 87.1 (Threshold: > 70)",
+    "status": "completed",
+    "details": "CloudWatch alarm in ALARM state."
+  },
+  {
+    "id": "evt-1792831016687-fc7f",
+    "timestamp": "02:06:56 pm",
+    "type": "instance-started",
+    "instanceId": "i-093937003",
+    "reason": "Node web-prod-app-02 (i-093937003) initialized and passed ALB target checks.",
+    "status": "completed",
+    "details": "Listening on port 4002 in ap-south-1b"
+  },
+  {
+    "id": "evt-1792831016277-9a92",
+    "timestamp": "02:06:56 pm",
+    "type": "scale-out",
+    "instanceId": "i-093937003",
+    "reason": "Auto Scaling Group launched instance web-prod-app-02 (i-093937003) to meet desired capacity 2",
+    "status": "completed",
+    "details": "Capacity scaled from 1 to 2"
+  },
+  {
+    "id": "evt-1792831016275-2e0e",
+    "timestamp": "02:06:56 pm",
+    "type": "alert",
+    "reason": "High CPU Alarm: reached 99 (Threshold: > 70)",
+    "status": "completed",
+    "details": "CloudWatch alarm in ALARM state."
+  },
+  {
+    "id": "evt-1792831014719-09c0",
+    "timestamp": "02:06:54 pm",
+    "type": "instance-started",
+    "instanceId": "i-09bd17f52",
+    "reason": "Node web-prod-app-01 (i-09bd17f52) initialized and passed ALB target checks.",
+    "status": "completed",
+    "details": "Listening on port 4001 in ap-south-1a"
+  },
+  {
     "id": "evt-1792603084233-2162",
     "timestamp": "10:48:04 pm",
     "type": "instance-started",
