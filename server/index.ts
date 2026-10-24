@@ -133,7 +133,7 @@ let asgConfig: AutoScalingConfig = {
   desiredInstances: 1,
   scaleOutThreshold: 70,
   scaleInThreshold: 30,
-  cooldownSeconds: 45,
+  cooldownSeconds: 15,
   activeCooldown: 0,
   policyType: 'Target Tracking',
   evaluationPeriod: '1 minute',

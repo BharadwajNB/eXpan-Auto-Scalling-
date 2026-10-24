@@ -3,6 +3,7 @@ export type InstanceStatus = 'healthy' | 'unhealthy' | 'launching' | 'terminatin
 export interface Instance {
   id: string;
   name: string;
+  port?: number;
   status: InstanceStatus;
   cpu: number; // percentage 0-100
   memory: number; // percentage 0-100

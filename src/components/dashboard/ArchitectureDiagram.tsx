@@ -127,7 +127,12 @@ export const ArchitectureDiagram: React.FC = () => {
           </div>
 
           <div className="my-auto py-1 text-[9px] space-y-0.5">
-            <div className="text-white font-bold">tg-expan-prod</div>
+            <div className="text-white font-bold flex items-center justify-between">
+              <span>tg-expan-prod</span>
+              <span className="text-[8px] font-mono text-white bg-neutral-900 px-1 py-0.2 rounded border border-neutral-700">
+                {instances.filter((i) => i.status === 'healthy').length}/{instances.length} ASSIGNED
+              </span>
+            </div>
             <div className="text-neutral-400">{lbInfo.activeConnections} TCP Sockets</div>
           </div>
 
@@ -146,6 +151,7 @@ export const ArchitectureDiagram: React.FC = () => {
               const total = instances.length;
               const yTarget = ((index + 0.5) / total) * 100;
               const isHighCpu = inst.cpu >= asgConfig.scaleOutThreshold;
+              const isLaunching = inst.status === 'launching';
 
               return (
                 <g key={inst.id}>
@@ -153,20 +159,20 @@ export const ArchitectureDiagram: React.FC = () => {
                   <path
                     d={`M 0,50 C 45,50 55,${yTarget} 100,${yTarget}`}
                     fill="none"
-                    stroke="rgba(255, 255, 255, 0.1)"
+                    stroke={isLaunching ? 'rgba(56, 189, 248, 0.4)' : 'rgba(255, 255, 255, 0.1)'}
                     strokeWidth="1.5"
                   />
                   {/* Animated flowing data beam */}
                   <path
                     d={`M 0,50 C 45,50 55,${yTarget} 100,${yTarget}`}
                     fill="none"
-                    stroke={isHighCpu ? '#ffffff' : 'rgba(255, 255, 255, 0.45)'}
-                    strokeWidth={isHighCpu ? '2.5' : '1.5'}
+                    stroke={isLaunching ? '#38bdf8' : isHighCpu ? '#ef4444' : 'rgba(255, 255, 255, 0.65)'}
+                    strokeWidth={isLaunching ? '2.5' : isHighCpu ? '2.5' : '1.5'}
                     strokeDasharray="4 4"
                     className="animate-flow-dash"
                   />
                   {/* Target Node Connector Dot */}
-                  <circle cx="100" cy={yTarget} r="2.5" fill="#ffffff" />
+                  <circle cx="100" cy={yTarget} r={isLaunching ? '3.5' : '2.5'} fill={isLaunching ? '#38bdf8' : '#ffffff'} />
                 </g>
               );
             })}
@@ -177,16 +183,31 @@ export const ArchitectureDiagram: React.FC = () => {
 
         {/* PILLAR 3: VPC Auto Scaling Target Fleet (The Server Blades) */}
         <div className="flex-1 h-full min-w-[240px] p-2 rounded-lg bg-black/60 border border-neutral-800 flex flex-col justify-between relative">
-          {/* Cluster Header */}
+          {/* Cluster Header with Direct Action Buttons */}
           <div className="flex items-center justify-between pb-1 border-b border-neutral-850 shrink-0 text-[9px]">
             <div className="flex items-center gap-1.5 text-neutral-300">
               <span className="w-1.5 h-1.5 rounded-full bg-white" />
               <span className="font-bold uppercase tracking-wider text-white">VPC ASG FLEET POOL</span>
               <span className="text-neutral-500 hidden sm:inline">(Dual-AZ)</span>
             </div>
-            <span className="font-bold text-white bg-neutral-900 px-1.5 py-0.2 rounded border border-neutral-800">
-              {instances.length} / {asgConfig.maxInstances} EC2 NODES
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="font-bold text-white bg-neutral-900 px-1.5 py-0.2 rounded border border-neutral-800">
+                {instances.length} / {asgConfig.maxInstances} NODES
+              </span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  manuallyScale('up');
+                }}
+                disabled={instances.length >= asgConfig.maxInstances}
+                className="px-1.5 py-0.5 rounded bg-white text-black font-bold hover:bg-neutral-200 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-0.5 text-[8px] transition-colors"
+                title="Provision new worker instance"
+              >
+                <Plus className="w-2.5 h-2.5" />
+                <span>ADD NODE</span>
+              </button>
+            </div>
           </div>
 
           {/* Symmetrical Rack Blades */}
@@ -194,6 +215,7 @@ export const ArchitectureDiagram: React.FC = () => {
             {instances.map((inst, index) => {
               const isHighCpu = inst.cpu >= asgConfig.scaleOutThreshold;
               const isLaunching = inst.status === 'launching';
+              const sharePct = Math.round((inst.requestsPerSecond / Math.max(1, metrics.requestsPerSecond)) * 100) || Math.round(100 / Math.max(1, instances.length));
 
               return (
                 <div
@@ -201,30 +223,36 @@ export const ArchitectureDiagram: React.FC = () => {
                   onClick={() => selectInstance(inst)}
                   className={`p-1.5 rounded-md bg-black border transition-all cursor-pointer flex items-center justify-between gap-2 ${
                     isHighCpu
-                      ? 'border-white bg-neutral-900'
+                      ? 'border-red-500 bg-red-950/20'
                       : isLaunching
-                      ? 'border-neutral-500 animate-pulse'
+                      ? 'border-cyan-500 bg-cyan-950/20 animate-pulse'
                       : 'border-neutral-800 hover:border-neutral-600'
                   }`}
-                  title={`Inspect ${inst.id} (${inst.privateIp})`}
+                  title={`Inspect ${inst.id} (${inst.privateIp}:${inst.port || 4001 + index})`}
                 >
                   {/* Left: Node Index & Zone */}
-                  <div className="flex items-center gap-1.5 shrink-0 min-w-[65px]">
+                  <div className="flex items-center gap-1.5 shrink-0 min-w-[70px]">
                     <span
                       className={`w-1.5 h-1.5 rounded-full ${
-                        isHighCpu ? 'bg-white animate-ping' : isLaunching ? 'bg-neutral-500' : 'bg-white'
+                        isHighCpu ? 'bg-red-500 animate-ping' : isLaunching ? 'bg-cyan-400' : 'bg-emerald-400'
                       }`}
                     />
                     <span className="text-[10px] font-bold text-white">#{index + 1}</span>
-                    <span className="text-[9px] text-neutral-400 bg-neutral-900 px-1 py-0.2 rounded border border-neutral-800">
-                      {inst.availabilityZone.replace('ap-south-', '')}
+                    <span className="text-[8px] text-neutral-400 bg-neutral-900 px-1 py-0.2 rounded border border-neutral-800">
+                      :{inst.port || 4001 + index}
                     </span>
                   </div>
 
-                  {/* Middle: ID & Private IP */}
+                  {/* Middle: ID, Status & Auto Load Balancer Share Badge */}
                   <div className="hidden sm:flex items-center gap-2 min-w-0">
-                    <span className="text-[10px] font-bold text-white truncate">{inst.id}</span>
-                    <span className="text-[9px] text-neutral-500 truncate">{inst.privateIp}</span>
+                    <span className="text-[10px] font-bold text-white truncate">{inst.name}</span>
+                    <span className={`text-[8px] font-mono px-1 py-0.2 rounded border ${
+                      isLaunching 
+                        ? 'bg-cyan-900/40 text-cyan-300 border-cyan-800' 
+                        : 'bg-neutral-900 text-neutral-300 border-neutral-800'
+                    }`}>
+                      {isLaunching ? 'BOOTING' : `${sharePct}% TRAFFIC`}
+                    </span>
                   </div>
 
                   {/* Right: CPU Bar & Ingress Rate */}
@@ -232,13 +260,13 @@ export const ArchitectureDiagram: React.FC = () => {
                     <div className="w-16 sm:w-20">
                       <div className="flex justify-between text-[8px] text-neutral-400 mb-0.5">
                         <span>CPU</span>
-                        <span className={isHighCpu ? 'text-white font-bold' : 'text-neutral-200'}>
+                        <span className={isHighCpu ? 'text-red-400 font-bold' : 'text-neutral-200'}>
                           {inst.cpu.toFixed(0)}%
                         </span>
                       </div>
                       <div className="w-full bg-neutral-900 rounded-full h-1 overflow-hidden border border-neutral-800">
                         <div
-                          className={`h-full ${isHighCpu ? 'bg-white' : 'bg-neutral-300'} transition-all duration-300`}
+                          className={`h-full ${isHighCpu ? 'bg-red-500' : isLaunching ? 'bg-cyan-400' : 'bg-white'} transition-all duration-300`}
                           style={{ width: `${Math.min(100, inst.cpu)}%` }}
                         />
                       </div>

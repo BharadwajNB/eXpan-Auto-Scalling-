@@ -10,7 +10,9 @@ import {
   RefreshCw,
   Flame,
   CheckCircle2,
-  Clock
+  Clock,
+  Plus,
+  Minus
 } from 'lucide-react';
 import { MetricCard } from '../components/dashboard/MetricCard';
 import { ArchitectureDiagram } from '../components/dashboard/ArchitectureDiagram';
@@ -20,6 +22,7 @@ import { ScalingTimeline } from '../components/dashboard/ScalingTimeline';
 
 export const DashboardPage: React.FC = () => {
   const metrics = useSystemStore((state) => state.metrics);
+  const instances = useSystemStore((state) => state.instances);
   const timeRange = useSystemStore((state) => state.timeRange);
   const setTimeRange = useSystemStore((state) => state.setTimeRange);
   const tickSimulation = useSystemStore((state) => state.tickSimulation);
@@ -28,6 +31,7 @@ export const DashboardPage: React.FC = () => {
   const loadTest = useSystemStore((state) => state.loadTest);
   const startLoadTest = useSystemStore((state) => state.startLoadTest);
   const stopLoadTest = useSystemStore((state) => state.stopLoadTest);
+  const manuallyScale = useSystemStore((state) => state.manuallyScale);
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -84,24 +88,45 @@ export const DashboardPage: React.FC = () => {
           )}
         </div>
 
-        {/* Right: Controls (Range, Refresh, Quick Load) */}
-        <div className="flex items-center gap-2 font-mono text-xs">
-          {/* Quick Load Test Generator */}
+        {/* Right: Controls (Add Node, Test Auto-Scaling, Range, Refresh) */}
+        <div className="flex items-center gap-1.5 font-mono text-xs">
+          {/* Quick Manual Add Instance */}
+          <button
+            onClick={() => manuallyScale('up')}
+            disabled={instances.length >= asgConfig.maxInstances}
+            className="px-2 py-0.5 rounded text-[10px] font-bold bg-white text-black hover:bg-neutral-200 border border-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1"
+            title="Provision new EC2 worker instance on next available port"
+          >
+            <Plus className="w-3 h-3" />
+            <span>ADD NODE</span>
+          </button>
+
+          {/* Scale In */}
+          <button
+            onClick={() => manuallyScale('down')}
+            disabled={instances.length <= asgConfig.minInstances}
+            className="px-1.5 py-0.5 rounded text-[10px] bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            title="Terminate surplus instance"
+          >
+            <Minus className="w-3 h-3" />
+          </button>
+
+          {/* Quick Auto-Scaling Stress / Surge Test */}
           <button
             onClick={toggleQuickLoad}
             className={`px-2 py-0.5 rounded text-[10px] font-bold border transition-all flex items-center gap-1 ${
               loadTest.isActive
-                ? 'bg-white text-black border-white'
-                : 'bg-neutral-900 hover:bg-neutral-800 text-neutral-200 border-neutral-800'
+                ? 'bg-amber-400 text-black border-amber-400 animate-pulse'
+                : 'bg-neutral-900 hover:bg-neutral-800 text-amber-300 border-amber-400/40 hover:border-amber-400'
             }`}
-            title="Start real HTTP traffic generation"
+            title="Inject 165 req/s load to test Auto-Scaling threshold breach (> 70% CPU)"
           >
-            <Flame className="w-3 h-3" />
-            <span>{loadTest.isActive ? 'STOP LOAD TEST' : 'START LOAD TEST'}</span>
+            <Flame className="w-3 h-3 text-amber-400" />
+            <span>{loadTest.isActive ? 'STOP SURGE LOAD' : '⚡ TEST AUTO-SCALING'}</span>
           </button>
 
           {/* Time range segmented tab group */}
-          <div className="flex items-center bg-black p-0.5 rounded border border-neutral-800">
+          <div className="flex items-center bg-black p-0.5 rounded border border-neutral-800 ml-1">
             {(['5m', '15m', '30m', '1h'] as const).map((r) => (
               <button
                 key={r}
