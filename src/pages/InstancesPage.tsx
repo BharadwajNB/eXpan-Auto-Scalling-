@@ -86,7 +86,7 @@ export const InstancesPage: React.FC = () => {
             size="sm"
             onClick={() => manuallyScale('up')}
             disabled={instances.length >= asgConfig.maxInstances}
-            title={instances.length >= asgConfig.maxInstances ? 'Maximum capacity ceiling reached (4)' : 'Provision new worker instance'}
+            title={instances.length >= asgConfig.maxInstances ? `Maximum capacity ceiling reached (${asgConfig.maxInstances})` : 'Provision new worker instance'}
             icon={<Plus className="w-3.5 h-3.5" />}
           >
             Provision Node

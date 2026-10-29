@@ -158,6 +158,11 @@ const server = http.createServer((req, res) => {
   res.end(JSON.stringify({ error: 'Endpoint not found', path: url.pathname }));
 });
 
+server.on('error', (err) => {
+  console.error(`[WORKER-ERROR] Node ${name} (${instanceId}) server error:`, err.message);
+  process.exit(1);
+});
+
 server.listen(port, '0.0.0.0', () => {
   console.log(`[BOOT] EC2 Worker Node ${name} (${instanceId}) listening on port ${port} [PID: ${process.pid}, AZ: ${az}, IP: ${privateIp}]`);
 });

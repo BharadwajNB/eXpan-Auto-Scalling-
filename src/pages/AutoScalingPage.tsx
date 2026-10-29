@@ -112,7 +112,7 @@ export const AutoScalingPage: React.FC = () => {
               size="sm"
               onClick={() => manuallyScale('up')}
               disabled={instances.length >= asgConfig.maxInstances}
-              title={instances.length >= asgConfig.maxInstances ? 'Maximum capacity ceiling reached (4)' : 'Manual scale-out'}
+              title={instances.length >= asgConfig.maxInstances ? `Maximum capacity ceiling reached (${asgConfig.maxInstances})` : 'Manual scale-out'}
               icon={<Plus className="w-3.5 h-3.5" />}
             >
               Scale Out
@@ -276,10 +276,10 @@ export const AutoScalingPage: React.FC = () => {
             <AreaChart data={history} margin={{ top: 10, right: 15, left: -25, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
               <XAxis dataKey="timeLabel" stroke="#737373" fontSize={10} tickLine={false} axisLine={false} />
-              <YAxis domain={[0, 5]} stroke="#737373" fontSize={10} tickLine={false} axisLine={false} />
+              <YAxis domain={[0, asgConfig.maxInstances + 1]} stroke="#737373" fontSize={10} tickLine={false} axisLine={false} />
               <Tooltip />
-              <ReferenceLine y={asgConfig.maxInstances} stroke="#a3a3a3" strokeDasharray="3 3" label={{ value: 'Max Ceiling (4)', fill: '#ffffff', fontSize: 9, position: 'insideTopRight' }} />
-              <ReferenceLine y={asgConfig.minInstances} stroke="#737373" strokeDasharray="3 3" label={{ value: 'Min Floor (1)', fill: '#d4d4d4', fontSize: 9, position: 'insideBottomRight' }} />
+              <ReferenceLine y={asgConfig.maxInstances} stroke="#a3a3a3" strokeDasharray="3 3" label={{ value: `Max Ceiling (${asgConfig.maxInstances})`, fill: '#ffffff', fontSize: 9, position: 'insideTopRight' }} />
+              <ReferenceLine y={asgConfig.minInstances} stroke="#737373" strokeDasharray="3 3" label={{ value: `Min Floor (${asgConfig.minInstances})`, fill: '#d4d4d4', fontSize: 9, position: 'insideBottomRight' }} />
               <Area type="stepAfter" dataKey="instances" stroke="#ffffff" strokeWidth={2} fill="#ffffff" fillOpacity={0.12} isAnimationActive={false} />
             </AreaChart>
           </ResponsiveContainer>

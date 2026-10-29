@@ -104,7 +104,7 @@ export const useSystemStore = create<SystemStore>((set, get) => ({
   events: [],
   asgConfig: {
     minInstances: 1,
-    maxInstances: 4,
+    maxInstances: 6,
     desiredInstances: 1,
     scaleOutThreshold: 70,
     scaleInThreshold: 30,

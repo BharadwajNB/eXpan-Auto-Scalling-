@@ -129,7 +129,7 @@ let lbInfo: LoadBalancerInfo = {
 // Auto Scaling Configuration
 let asgConfig: AutoScalingConfig = {
   minInstances: 1,
-  maxInstances: 4,
+  maxInstances: 6,
   desiredInstances: 1,
   scaleOutThreshold: 70,
   scaleInThreshold: 30,
@@ -204,17 +204,31 @@ function logEvent(type: ScalingEvent['type'], reason: string, details?: string, 
 
 const WORKER_SCRIPT = path.join(process.cwd(), 'server', 'worker.js');
 
-function getAvailablePort(): number {
-  const usedPorts = new Set(instances.map(i => i.port));
-  let port = 4001;
-  while (usedPorts.has(port)) {
-    port++;
-  }
-  return port;
+import net from 'node:net';
+
+function isPortFree(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const server = net.createServer();
+    server.once('error', () => resolve(false));
+    server.once('listening', () => {
+      server.close(() => resolve(true));
+    });
+    server.listen(port, '0.0.0.0');
+  });
 }
 
-function spawnWorkerNode(preferredPort?: number, preferredName?: string, preferredAz?: string): Instance {
-  const port = preferredPort || getAvailablePort();
+async function getAvailablePort(): Promise<number> {
+  let port = 4001;
+  while (true) {
+    const inUse = instances.some(i => i.port === port);
+    if (!inUse && await isPortFree(port)) return port;
+    port++;
+    if (port > 4100) throw new Error('No available ports in range 4001-4100');
+  }
+}
+
+async function spawnWorkerNode(preferredPort?: number, preferredName?: string, preferredAz?: string): Promise<Instance> {
+  const port = preferredPort !== undefined ? preferredPort : await getAvailablePort();
   const id = `i-0${Math.random().toString(16).substring(2, 10)}`;
   const index = instances.length + 1;
   const name = preferredName || `web-prod-app-0${index}`;
@@ -236,6 +250,8 @@ function spawnWorkerNode(preferredPort?: number, preferredName?: string, preferr
     silent: true,
   });
 
+  const launchEpoch = Date.now();
+
   const instance: Instance = {
     id,
     name,
@@ -245,7 +261,7 @@ function spawnWorkerNode(preferredPort?: number, preferredName?: string, preferr
     cpu: 18.0,
     memory: 38.0,
     requestsPerSecond: 0,
-    uptime: '0m',
+    uptime: '0s',
     availabilityZone: az,
     privateIp,
     publicIp,
@@ -257,7 +273,8 @@ function spawnWorkerNode(preferredPort?: number, preferredName?: string, preferr
     totalRequests: 0,
     inFlightRequests: 0,
     logs: [`[BOOT] Worker process initialized on port ${port} with PID ${child.pid}`],
-  };
+    _launchEpoch: launchEpoch,
+  } as Instance & { _launchEpoch: number };
 
   // Capture stdout
   child.stdout?.on('data', (data) => {
@@ -296,7 +313,9 @@ function spawnWorkerNode(preferredPort?: number, preferredName?: string, preferr
       const res = await fetch(`http://localhost:${port}/health`);
       if (res.ok) {
         clearInterval(checkInterval);
-        instance.status = 'healthy';
+        if (instance.status === 'launching' || instance.status === 'healthy') {
+          instance.status = 'healthy';
+        }
         instance.healthCheckPasses = 1;
         instance.logs.push(`[HEALTH] HTTP /health passed 200 OK. Target registered with ALB.`);
         logEvent('instance-started', `Node ${instance.name} (${instance.id}) initialized and passed ALB target checks.`, `Listening on port ${port} in ${az}`, instance.id);
@@ -306,13 +325,14 @@ function spawnWorkerNode(preferredPort?: number, preferredName?: string, preferr
     }
   }, 400);
 
-  // Fallback timeout to healthy after 3s
+  // Fallback timeout to healthy after 5s
   setTimeout(() => {
     clearInterval(checkInterval);
     if (instance.status === 'launching') {
       instance.status = 'healthy';
+      instance.logs.push(`[HEALTH] Worker assumed healthy after startup timeout.`);
     }
-  }, 3000);
+  }, 5000);
 
   return instance;
 }
@@ -343,7 +363,26 @@ async function terminateWorkerNode(id: string, reason = 'Scale-In or administrat
 }
 
 // Initialize baseline fleet (1 active EC2 worker node)
-spawnWorkerNode(4001, 'web-prod-app-01', 'ap-south-1a');
+spawnWorkerNode(undefined, 'web-prod-app-01', 'ap-south-1a').catch(console.error);
+
+// Uptime ticker — updates every second for live display
+setInterval(() => {
+  const now = Date.now();
+  instances.forEach((inst: any) => {
+    if (!inst._launchEpoch) return;
+    const elapsedSec = Math.floor((now - inst._launchEpoch) / 1000);
+    const h = Math.floor(elapsedSec / 3600);
+    const m = Math.floor((elapsedSec % 3600) / 60);
+    const s = elapsedSec % 60;
+    if (h > 0) {
+      inst.uptime = `${h}h ${m}m`;
+    } else if (m > 0) {
+      inst.uptime = `${m}m ${s}s`;
+    } else {
+      inst.uptime = `${s}s`;
+    }
+  });
+}, 1000);
 
 // -----------------------------------------------------------------------
 // APPLICATION LOAD BALANCER (ALB) REVERSE PROXY
@@ -523,7 +562,7 @@ function stopLoadTestEngine() {
 // AUTO SCALING GROUP (ASG) SUPERVISOR CONTROLLER (Runs every 2s)
 // -----------------------------------------------------------------------
 
-setInterval(() => {
+setInterval(async () => {
   const healthyNodes = instances.filter(i => i.status === 'healthy');
   const healthyCount = Math.max(1, healthyNodes.length);
 
@@ -531,7 +570,7 @@ setInterval(() => {
   const activeTraffic = loadTest.isActive ? loadTest.currentRps : 32;
   const basePerNodeTraffic = Math.round(activeTraffic / healthyCount);
 
-  // Compute live CPU: Base OS 10% + real traffic factor
+  // Compute live CPU: Base OS 15% + traffic factor (calibrated so idle≈24%, high≈65%, extreme≈100%)
   let fleetCpuSum = 0;
   instances.forEach((inst, idx) => {
     if (inst.status === 'unhealthy') {
@@ -539,17 +578,18 @@ setInterval(() => {
       return;
     }
     const perNodeRps = inst.requestsPerSecond || basePerNodeTraffic;
-    const computedCpu = Math.min(99, Math.max(14, 10 + (perNodeRps * 4.2) + ((idx % 2 === 0 ? 1 : -1) * 2)));
+    const jitter = (idx % 2 === 0 ? 1 : -1) * (2 + Math.random() * 3);
+    const computedCpu = Math.min(99, Math.max(12, 15 + (perNodeRps * 0.3) + jitter));
     inst.cpu = +computedCpu.toFixed(1);
-    inst.memory = Math.min(88, Math.max(34, +(38 + inst.cpu * 0.4).toFixed(1)));
+    inst.memory = Math.min(88, Math.max(34, +(32 + inst.cpu * 0.35).toFixed(1)));
     inst.requestsPerSecond = inst.status === 'healthy' ? perNodeRps : 0;
-    inst.networkInMb = +(10 + inst.cpu * 0.25).toFixed(1);
-    inst.networkOutMb = +(25 + inst.cpu * 0.75).toFixed(1);
+    inst.networkInMb = +(8 + inst.cpu * 0.2).toFixed(1);
+    inst.networkOutMb = +(18 + inst.cpu * 0.55).toFixed(1);
     fleetCpuSum += inst.cpu;
   });
 
   const avgCpu = +(fleetCpuSum / Math.max(1, instances.length)).toFixed(1);
-  const avgMemory = Math.round(40 + avgCpu * 0.35);
+  const avgMemory = Math.round(38 + avgCpu * 0.28);
 
   // Decrement active cooldown
   if (asgConfig.activeCooldown > 0) {
@@ -557,12 +597,13 @@ setInterval(() => {
   }
 
   // 1. SELF-HEALING ENGINE: Detect dead or failed nodes and replace automatically!
+  // Only fire on confirmed 'unhealthy' - never on 'launching' (avoids double-spawn on startup)
   const deadNode = instances.find(i => i.status === 'unhealthy');
-  if (deadNode) {
+  if (deadNode && deadNode.status === 'unhealthy') {
     console.log(`[SELF-HEALING] Detected unhealthy node ${deadNode.id}. Triggering automated recovery...`);
     deadNode.status = 'terminating';
     terminateWorkerNode(deadNode.id, 'Self-healing replacement cycle');
-    const replacement = spawnWorkerNode();
+    const replacement = await spawnWorkerNode();
     logEvent(
       'instance-replaced',
       `Auto Scaling self-healing: Terminated unhealthy node ${deadNode.id} and launched replacement ${replacement.name} (${replacement.id})`,
@@ -579,7 +620,7 @@ setInterval(() => {
   // Scale-Out Trigger
   if (metricVal >= outLimit && instances.length < asgConfig.maxInstances) {
     if (asgConfig.activeCooldown <= 0) {
-      const newInst = spawnWorkerNode();
+      const newInst = await spawnWorkerNode();
       asgConfig.activeCooldown = asgConfig.cooldownSeconds;
       asgConfig.desiredInstances = instances.length;
       logEvent('alert', `High ${asgConfig.metricType.toUpperCase()} Alarm: reached ${metricVal} (Threshold: > ${outLimit})`, 'CloudWatch alarm in ALARM state.');
@@ -680,13 +721,14 @@ app.get('/api/instances/:id/logs', (req, res) => {
 });
 
 // Provision new instance
-app.post('/api/instances', (req, res) => {
+app.post('/api/instances', async (req, res) => {
   if (instances.length >= asgConfig.maxInstances) {
     res.status(400).json({ error: `Cannot launch instance: Maximum capacity limit (${asgConfig.maxInstances}) reached.` });
     return;
   }
-  const inst = spawnWorkerNode();
+  const inst = await spawnWorkerNode();
   asgConfig.desiredInstances = instances.length;
+  asgConfig.activeCooldown = asgConfig.cooldownSeconds;
   res.status(201).json({ success: true, instance: { id: inst.id, name: inst.name, port: inst.port, az: inst.availabilityZone } });
 });
 
