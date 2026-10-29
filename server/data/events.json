@@ -1,5 +1,55 @@
 [
   {
+    "id": "evt-1792837077943-e3f0",
+    "timestamp": "03:47:57 pm",
+    "type": "alert",
+    "reason": "Traffic generator stopped. CloudWatch monitoring cooldown initiated.",
+    "status": "completed"
+  },
+  {
+    "id": "evt-1792837067517-f28b",
+    "timestamp": "03:47:47 pm",
+    "type": "alert",
+    "reason": "Traffic generator started: injecting 165 req/s towards ALB target group",
+    "status": "completed",
+    "details": "Profile: HIGH, Waveform: constant"
+  },
+  {
+    "id": "evt-1792837046856-5b4e",
+    "timestamp": "03:47:26 pm",
+    "type": "instance-started",
+    "instanceId": "i-0cf869832",
+    "reason": "Node web-prod-app-04 (i-0cf869832) initialized and passed ALB target checks.",
+    "status": "completed",
+    "details": "Listening on port 4003 in ap-south-1b"
+  },
+  {
+    "id": "evt-1792837046439-c28c",
+    "timestamp": "03:47:26 pm",
+    "type": "scale-out",
+    "instanceId": "i-0cf869832",
+    "reason": "Auto Scaling Group launched instance web-prod-app-04 (i-0cf869832) to meet desired capacity 4",
+    "status": "completed",
+    "details": "Capacity scaled from 3 to 4"
+  },
+  {
+    "id": "evt-1792837046439-fb69",
+    "timestamp": "03:47:26 pm",
+    "type": "alert",
+    "reason": "High CPU Alarm: reached 73.3 (Threshold: > 70)",
+    "status": "completed",
+    "details": "CloudWatch alarm in ALARM state."
+  },
+  {
+    "id": "evt-1792837044811-08c1",
+    "timestamp": "03:47:24 pm",
+    "type": "scale-in",
+    "instanceId": "i-07c3ffde9",
+    "reason": "Instance web-prod-app-03 (i-07c3ffde9) drained and terminated",
+    "status": "completed",
+    "details": "Manual administrative termination"
+  },
+  {
     "id": "evt-1792834171549-27ab",
     "timestamp": "02:59:31 pm",
     "type": "instance-started",
