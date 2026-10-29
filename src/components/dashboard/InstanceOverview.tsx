@@ -33,10 +33,11 @@ export const InstanceOverview: React.FC = () => {
           <button
             onClick={() => manuallyScale('up')}
             disabled={instances.length >= asgConfig.maxInstances}
-            className="px-1.5 py-0.5 rounded bg-white hover:bg-neutral-200 text-black font-bold disabled:opacity-30 disabled:cursor-not-allowed border border-white"
-            title="Manual Scale-Out"
+            className="px-2 py-0.5 rounded bg-white hover:bg-neutral-200 text-black font-bold disabled:opacity-30 disabled:cursor-not-allowed border border-white flex items-center gap-1 text-[10px]"
+            title="Provision new worker instance"
           >
             <Plus className="w-3 h-3" />
+            <span>Add Node</span>
           </button>
           <button
             onClick={() => navigate('/instances')}

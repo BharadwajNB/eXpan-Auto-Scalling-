@@ -119,18 +119,24 @@ Follow these steps to demonstrate complete cloud elasticity and fault tolerance:
 ```
 
 1. **Verify Baseline State**:
-   - Open `/dashboard`. Observe 1 running worker node (`web-prod-app-01`) at ~24% CPU in a `STABLE` state.
-2. **Trigger Auto Scale-Out**:
-   - Go to `/load-testing`, select **"High Surge"** (165 req/s), and click **"Start HTTP Load Test"**.
-   - As real requests hit the ALB, CPU utilization breaches the **70% threshold**.
-   - The ASG controller triggers an alarm and spawns `web-prod-app-02`. Traffic is instantly shared 50/50, bringing CPU back into the safe zone.
-3. **Test Disaster Recovery (Self-Healing)**:
-   - Click the node in the interactive architecture diagram to open the **Node Inspector Drawer**.
+   - Open `/dashboard`. Observe 1 running worker node (`web-prod-app-01`) at ~24% CPU with `100% TRAFFIC` in a `STABLE` state.
+2. **Demonstrate Click-to-Add Instance & Auto ALB Assignment**:
+   - Click **`+ ADD NODE`** on the top command bar or on the topology rack.
+   - A new child process (`web-prod-app-02`) is spawned on port `4002` in `BOOTING` state.
+   - Within 1–2 seconds, its `/health` check passes 200 OK (`IN-SERVICE`).
+   - The Load Balancer automatically assigns it to `tg-expan-prod`, draws a live data stream, and splits traffic `50% / 50%` between both nodes!
+3. **Trigger CPU-Driven Auto-Scaling**:
+   - Click **`⚡ TEST AUTO-SCALING`** on the top bar.
+   - Real HTTP requests surge to 165 req/s, driving CPU past the red **`70% ALARM`** threshold.
+   - The ASG controller triggers an alarm and automatically launches `web-prod-app-03` without manual clicks.
+   - The ALB immediately distributes traffic across all 3 nodes, and fleet CPU drops back below 50% (System Stabilized).
+4. **Test Disaster Recovery (Self-Healing)**:
+   - Click any node in the topology diagram to open the **Node Inspector Drawer**.
    - Click **"Crash Node via SIGKILL"**.
    - The ALB health prober flags the node as `unhealthy`. Within 2 seconds, the supervisor terminates the dead process and provisions an operational replacement.
-4. **Trigger Auto Scale-In**:
-   - Click **"Stop Load Test"**.
-   - Traffic subsides. As average CPU falls below **30%**, the ASG initiates connection draining and shuts down surplus nodes, safely returning to baseline.
+5. **Trigger Auto Scale-In**:
+   - Click **`STOP SURGE LOAD`**.
+   - Traffic subsides. As average CPU falls below the green **`30% IN`** line, the ASG drains connections and shuts down surplus nodes, safely returning to baseline.
 
 ---
 

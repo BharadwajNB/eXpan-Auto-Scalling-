@@ -128,16 +128,16 @@ export const UnifiedCharts: React.FC = () => {
                   return null;
                 }}
               />
-              <ReferenceLine y={asgConfig.scaleOutThreshold} stroke="#ffffff" strokeDasharray="2 2" strokeWidth={1} label={{ value: `70% Out`, fill: '#ffffff', fontSize: 9, position: 'insideTopRight' }} />
-              <ReferenceLine y={asgConfig.scaleInThreshold} stroke="#737373" strokeDasharray="2 2" strokeWidth={1} label={{ value: `30% In`, fill: '#a3a3a3', fontSize: 9, position: 'insideBottomRight' }} />
-              <Area type="monotone" dataKey="cpu" stroke="#ffffff" strokeWidth={1.5} fill="url(#cpuBwGrad)" isAnimationActive={false} />
+              <ReferenceLine y={asgConfig.scaleOutThreshold} stroke="#ef4444" strokeDasharray="3 3" strokeWidth={1.5} label={{ value: `70% ALARM`, fill: '#ef4444', fontSize: 9, position: 'insideTopRight' }} />
+              <ReferenceLine y={asgConfig.scaleInThreshold} stroke="#10b981" strokeDasharray="3 3" strokeWidth={1} label={{ value: `30% IN`, fill: '#10b981', fontSize: 9, position: 'insideBottomRight' }} />
+              <Area type="monotone" dataKey="cpu" stroke={isAboveThreshold ? '#ef4444' : '#ffffff'} strokeWidth={1.8} fill="url(#cpuBwGrad)" isAnimationActive={false} />
             </AreaChart>
           ) : (
-            // Split dual metrics: CPU (solid white) and Traffic (neutral gray line)
+            // Split dual metrics: CPU (solid line) and Traffic (neutral dashed line)
             <AreaChart data={history} margin={{ top: 5, right: 8, left: -28, bottom: 0 }}>
               <defs>
                 <linearGradient id="splitCpuBwGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#ffffff" stopOpacity={0.12} />
+                  <stop offset="5%" stopColor={isAboveThreshold ? '#ef4444' : '#ffffff'} stopOpacity={0.15} />
                   <stop offset="95%" stopColor="#ffffff" stopOpacity={0.0} />
                 </linearGradient>
               </defs>
@@ -160,8 +160,9 @@ export const UnifiedCharts: React.FC = () => {
                   return null;
                 }}
               />
-              <ReferenceLine y={asgConfig.scaleOutThreshold} stroke="#ffffff" strokeDasharray="2 2" strokeWidth={1} label={{ value: `70%`, fill: '#ffffff', fontSize: 8 }} />
-              <Area type="monotone" dataKey="cpu" stroke="#ffffff" strokeWidth={1.5} fill="url(#splitCpuBwGrad)" isAnimationActive={false} />
+              <ReferenceLine y={asgConfig.scaleOutThreshold} stroke="#ef4444" strokeDasharray="3 3" strokeWidth={1.5} label={{ value: `70% ALARM`, fill: '#ef4444', fontSize: 8 }} />
+              <ReferenceLine y={asgConfig.scaleInThreshold} stroke="#10b981" strokeDasharray="3 3" strokeWidth={1} label={{ value: `30% IN`, fill: '#10b981', fontSize: 8 }} />
+              <Area type="monotone" dataKey="cpu" stroke={isAboveThreshold ? '#ef4444' : '#ffffff'} strokeWidth={1.8} fill="url(#splitCpuBwGrad)" isAnimationActive={false} />
               <Area type="monotone" dataKey="requests" stroke="#737373" strokeWidth={1.5} fill="none" strokeDasharray="3 3" isAnimationActive={false} />
             </AreaChart>
           )}

@@ -149,7 +149,7 @@ export const useSystemStore = create<SystemStore>((set, get) => ({
   selectedInstanceLogs: [],
   isLoadingLogs: false,
   simulationRunning: true,
-  simulationSpeed: '1x',
+  simulationSpeed: '2x',
   timeRange: '30m',
   toast: null,
   environment: 'production',
